@@ -1,0 +1,4 @@
+1) `shell`                               Drop into an interactive shell and allow users to gracefully `exit`
+2) `pull <remote-path> <local-path>`     Download files
+3) `help`                                Shows this help menu
+4) `quit`                                Quit the shell
