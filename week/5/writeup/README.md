@@ -1,14 +1,19 @@
 Writeup 5 - Binaries I
 ======
 
-Name: *PUT YOUR NAME HERE*
-Section: *PUT YOUR SECTION HERE*
+Name: Corbett Blair
+Section: 0101
 
 I pledge on my honor that I havie not given or received any unauthorized assistance on this assignment or examination.
 
-Digital acknowledgement of honor pledge: *PUT YOUR NAME HERE*
+Digital acknowledgement of honor pledge: Corbett Blair
 
 ## Assignment 5 Writeup
 
-*Put your writeup words here in accordance to the Part 3 requirements*
+The first thing that came into my mind as I began to write up is I need to find out how to access the function parameters. I remember from 216 and research I've done on my own that they are sometimes accessed through adding to the base pointer, i.e. a parameter may be located at [rbp + 16]. However, I remembered from lecture that there may be an easier way to find them, so I went back to the powerpoint. There was. In the version of assembly we are using, parameters are simply stored in pre-determined registers. This made things a lot easier.
 
+My next plan was to get memset down - if I could get it working, the strncpy logic would be very similar and should be easy enough. In the C code, the for loop is handled by declaring a variable i = 0 and then incrementing that. However, the loop in the slides uses a register rcx to keep track, not utilizing the stack. I wasn't sure whether I needed to decrement rsp and put the variable i on the stack, and I'm still not sure if I should have or not. I ended up not, instead moving the third parameter directly into rcx and using the loop feature, which pretty much does the same thing as declaring i = 0 then entering a for loop. It ended up working, but I still am not sure if it would have been better to push a variable onto the stack and increment/decrement it there, like it appears the C code is doing. As of now, the function copied the length into rcx, went into a loop, and copied the val into [rdi], the address to be overwritten. Then, rdi is incremented to move into the next character, and the loop continues until rcx is 0.
+
+The next hurdle I had to get over was moving only one byte to [rdi] at a time. I got the function working by moving a qword over at a time, but because of the size, the rest of the original string was overwritten no matter what. What I mean by that was: The expected output was Hello zzzzz!, but mine was outputting Hello zzzzz, without the exclamation point. If I changed my function to only memcpy a single z, it would output Hello z. This was a problem. When I tried to do the method in the slides of using the keyword "byte" while using the mov operand, I kept getting errors saying "cannot override register size." No matter where I put "byte", the compiler didn't let me override a register size. So, back to the slides I went, and found that if I stored the value to be copied in rax but accessed al, it would only access the last byte of rax. So, when I started moving from al to [rdi], memcpy worked. 
+
+Strncpy was relatively simple once I get memcpy working. However, I wanted to try to simplify my code by using a variation of the MOV operand. I looked up and there seemed to be a command that fit this perfectly - MOVSB, for moving strings. Apparently, this function moves characters from one string to another in one command. Normally, we would have to access the character at the first memory location and store it in a register before storing it in the destination string. You cannot move from memory address to memory address. It also appeared that MOVSB took no arguments - it simply worked on the RSI and RDI registers. So, I coded up my new loop, which at this point was only one command - MOVSB, and then I incremented RDI and RSI. The second output I recieved was Hello Hzlzo! which was perplexing to me. It seemed to be copying every other character. I went and checked out the code for what MOVSB does and I found out that it even increments the memory addresses for you. So, now my loop was literally just MOVSB and then the loop call. It worked!
